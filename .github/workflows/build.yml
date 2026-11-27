@@ -1,4 +1,3 @@
-
 name: Build RaifTV APK
 
 on:
@@ -11,7 +10,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -22,11 +20,6 @@ jobs:
           distribution: temurin
           java-version: '17'
 
-      - name: Set up Gradle
-        uses: gradle/actions/setup-gradle@v4
-        with:
-          gradle-version: '8.9'
-
       - name: Set up Android SDK
         uses: android-actions/setup-android@v3
 
@@ -36,13 +29,14 @@ jobs:
       - name: Extract project
         run: |
           mkdir extracted
-          ZIP_FILE=$(find . -maxdepth 1 -name '*.zip' | head -n 1)
-          unzip -q "$ZIP_FILE" -d extracted
-          SETTINGS_FILE=$(find extracted -name settings.gradle.kts -print -quit)
-          PROJECT_DIR=$(dirname "$SETTINGS_FILE")
+          unzip -q *.zip -d extracted
+          PROJECT_DIR=$(dirname "$(find extracted -name settings.gradle.kts -print -quit)")
           echo "PROJECT_DIR=$PROJECT_DIR" >> "$GITHUB_ENV"
 
       - name: Build APK
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Compile APK
         run: gradle -p "$PROJECT_DIR" assembleDebug
 
       - name: Upload APK
